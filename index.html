@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hello</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: "Helvetica Neue", "PingFang SC", sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #f3f4ff);
+      color: #333;
+      text-align: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+    .title {
+      font-size: 24px;
+      background: linear-gradient(135deg, #3498db, #8e44ad);
+      color: #fff;
+      padding: 18px 30px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+      margin-bottom: 36px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .link-options {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      width: 100%;
+      max-width: 440px;
+    }
+    .link-options a {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 17px;
+      padding: 14px 20px;
+      border-radius: 10px;
+      text-decoration: none;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, background-color 0.3s, color 0.3s;
+      cursor: pointer;
+    }
+    .link-options a::before {
+      content: "✅";
+      margin-right: 8px;
+      font-size: 18px;
+    }
+    .link-options a.a {
+      color: #3498db;
+      border: 1px solid #3498db;
+      background-color: #fff;
+    }
+    .link-options a.a:hover {
+      background-color: #3498db;
+      color: #fff;
+    }
+    .link-options a.c {
+      color: #9b59b6;
+      border: 1px solid #9b59b6;
+      background-color: #fff;
+    }
+    .link-options a.c:hover {
+      background-color: #9b59b6;
+      color: #fff;
+    }
+    @media (max-width: 480px) {
+      .title {
+        font-size: 20px;
+        padding: 14px 20px;
+      }
+      .link-options a {
+        font-size: 16px;
+        padding: 12px 18px;
+      }
+    }
+  </style>
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?91c28d87b7d87b581fb560f0addfd772";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+</head>
+<body>
+  <main class="container">
+    <div class="title">👇點击閞晵視厛之膂👇</div>
+    <div class="link-options">
+      <a class="c" href="jump.html?link=1" onclick="_hmt.push(['_trackEvent', '按钮点击', '点击', '通道A'])">1.堔夜專線，隨時啓航👈</a>
+      <a class="c" href="jump.html?link=2" onclick="_hmt.push(['_trackEvent', '按钮点击', '点击', '通道B'])">2.敟蔵浭噺，擏埥剘待👈</a>
+      <a class="a" href="jump.html?link=3" onclick="_hmt.push(['_trackEvent', '按钮点击', '点击', '通道C'])">3. 甄選匼潗，隨杺點閱👈</a>
+    </div>
+  </main>
+</body>
+</html>
