@@ -1,104 +1,36 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>正在跳转...</title>
-    <style>
-        /* 重置默认样式 */
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #f2f2f2; }
-        
-        /* 遮罩层样式：默认隐藏 */
-        #weixin-mask {
-            display: none; /* 默认不显示 */
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8); /* 半透明黑色背景 */
-            z-index: 9999;
-        }
-
-        /* 提示文字和图标的容器 */
-        .tip-container {
-            text-align: right;
-            padding: 20px 30px 0 0;
-        }
-
-        /* 简单的纯CSS绘制箭头 (避免图片加载失败) */
-        .arrow {
-            display: inline-block;
-            width: 0; height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-bottom: 15px solid #fff;
-            transform: rotate(25deg);
-            margin-right: 10px;
-            margin-bottom: 5px;
-            animation: bounce 1.5s infinite;
-        }
-
-        /* 提示文字样式 */
-        .tip-text {
-            color: #fff;
-            font-size: 18px;
-            font-family: "Microsoft YaHei", sans-serif;
-            line-height: 1.6;
-            font-weight: bold;
-        }
-        
-        .tip-highlight {
-            color: #4cbf00; /* 醒目的绿色 */
-        }
-
-        /* 简单的跳动动画 */
-        @keyframes bounce {
-            0%, 100% { transform: translate(0, 0) rotate(25deg); }
-            50% { transform: translate(5px, -5px) rotate(25deg); }
-        }
-    </style>
+<meta charset="utf-8">
+<title>Loading</title>
 </head>
+
 <body>
 
-    <div id="weixin-mask">
-        <div class="tip-container">
-            <div style="margin-bottom: 10px;">
-                <img src="https://p1.music.126.net/u13g0K0e1k6f8Q60c5Q6Zw==/109951164213370089.png" 
-                     style="width: 60px; transform: rotate(-90deg);" 
-                     alt="箭头" 
-                     onerror="this.style.display='none'; document.querySelector('.arrow').style.display='inline-block';">
-                <div class="arrow" style="display:none;"></div>
-            </div>
-            
-            <div class="tip-text">
-                点击右上角图标 <span style="font-size:22px">...</span><br>
-                选择 <span class="tip-highlight">在浏览器打开</span>
-            </div>
-        </div>
-    </div>
+<script>
 
-    <div style="text-align: center; padding-top: 100px; color: #666;">
-        正在加载内容...<br>如果没有跳转，请手动刷新。
-    </div>
+var main="https://csdw-lg.github.io/from2/"
+var backup="https://csdw-lg.github.io/from2/"
 
-    <script>
-        // ================= 配置区域 =================
-        // 将下面的链接换成你真正想让用户看到的链接
-        var targetUrl = "https://csdw-lg.github.io/from2/"; 
-        // ===========================================
+var ua=navigator.userAgent.toLowerCase()
 
-        // 检测是否为微信浏览器
-        function isWechat() {
-            var ua = navigator.userAgent.toLowerCase();
-            return ua.indexOf('micromessenger') !== -1;
-        }
+function isWechat(){
+return ua.indexOf("micromessenger")>-1
+}
 
-        // 执行逻辑
-        if (isWechat()) {
-            // 如果是微信，显示遮罩层
-            document.getElementById('weixin-mask').style.display = 'block';
-        } else {
-            // 如果不是微信，直接跳转
-            window.location.href = targetUrl;
-        }
-    </script>
+function go(url){
+setTimeout(function(){
+location.replace(url)
+},Math.random()*400+200)
+}
+
+if(isWechat()){
+document.write("请点击右上角在浏览器打开")
+}else{
+go("https://"+main)
+}
+
+</script>
+
 </body>
 </html>
