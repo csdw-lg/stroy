@@ -2,142 +2,334 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>正在跳转...</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>跳转引导 · 优化版</title>
 <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 html, body {
-    margin:0; padding:0; width:100%; height:100%; overflow:hidden; 
-    background:#f2f2f2; font-family:"Microsoft YaHei",sans-serif;
+  width: 100%;
+  height: 100%;
+  background: #f5f7fa;
+  font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
 }
 
+/* 加载占位（被遮罩覆盖，保留以备不时之需） */
+.loading-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: #999;
+  font-size: 16px;
+  background: #f5f7fa;
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 16px;
+  border: 3px solid rgba(0,0,0,0.05);
+  border-top-color: #07c160;
+  border-radius: 50%;
+  animation: spin 1s infinite linear;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- 微信遮罩 - 优化版 ---------- */
 #weixin-mask {
-    display: none;
-    position: fixed; top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.85);
-    z-index: 9999;
-    display: flex; justify-content: flex-end; align-items: flex-start;
-    padding: 30px; box-sizing: border-box;
-    animation: fadeIn 0.5s ease forwards;
-}
-@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+  display: none;  /* 默认隐藏，仅在微信中显示 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
 
-.tip-container {
-    text-align: right;
-    max-width: 200px;
-    position: relative;
-}
+  /* 毛玻璃背景 + 深色半透明备选 */
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px) brightness(0.8);
+  -webkit-backdrop-filter: blur(12px) brightness(0.8);
 
-.arrow-hand {
-    width: 60px; height: 60px;
-    position: absolute;
-    right:0; top:0;
+  /* 关键：让鼠标/触摸事件穿透遮罩，用户可直接点击右上角菜单 */
+  pointer-events: none;
+
+  /* 柔缓入场 */
+  animation: maskFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.hand {
-    width: 40px;
-    position: absolute;
-    right:0; top:0;
-    transform-origin: center center;
+@keyframes maskFadeIn {
+  0% { opacity: 0; backdrop-filter: blur(0px) brightness(1); }
+  100% { opacity: 1; backdrop-filter: blur(12px) brightness(0.8); }
 }
 
-.tip-text {
-    color: #fff;
-    font-size: 17px;        
-    line-height: 1.3;       
-    font-weight: bold;
-    margin-top: 45px;       
-    opacity: 1;
-    transition: opacity 0.3s ease;
-}
-.tip-highlight {
-    color: #4cbf00;
-    font-weight: bold;
+/* 遮罩内部所有视觉元素同样不阻挡点击，但保留显示 */
+#weixin-mask * {
+  pointer-events: none;
 }
 
-.loading-text {
-    text-align:center;
-    padding-top:100px;
-    color:#666;
-    font-size:16px;
-    line-height:1.6;
+/* 引导容器 - 置于右上角 */
+.guide-container {
+  position: absolute;
+  top: max(20px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+  max-width: 280px;
+  transform: translateZ(0); /* 硬件加速 */
+}
+
+/* 手指与波纹区域 */
+.finger-wrapper {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(6deg) translateX(6px); /* 让手指自然指向右上角 */
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.3));
+}
+
+/* 手指图标 (微调原手势，更圆润) */
+.finger-svg {
+  width: 68px;
+  height: 68px;
+  fill: #ffffff;
+  opacity: 0.95;
+  transform-origin: 70% 30%;
+  animation: fingerTap 1.8s infinite ease-in-out;
+}
+
+@keyframes fingerTap {
+  0%, 100% {
+    transform: scale(1) translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.02) translateY(-3px) rotate(-1deg);
+  }
+  50% {
+    transform: scale(0.98) translateY(2px) rotate(1deg);
+  }
+  75% {
+    transform: scale(1.01) translateY(-1px) rotate(0deg);
+  }
+}
+
+/* 波纹圆圈 (两个重叠，增加层次) */
+.ripple {
+  position: absolute;
+  top: 10px;
+  right: 5px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  z-index: -1;
+  animation: rippleWave 2.4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ripple::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.3);
+  animation: rippleWave2 2.4s infinite 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes rippleWave {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes rippleWave2 {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(2.0);
+    opacity: 0;
+  }
+}
+
+/* 引导文字卡片 */
+.tip-card {
+  background: rgba(20, 20, 25, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 28px;
+  padding: 16px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.4);
+  text-align: right;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.3px;
+  transform-origin: right center;
+  animation: cardFloat 2.6s infinite alternate ease-in-out;
+}
+
+@keyframes cardFloat {
+  0% { transform: translateX(0) translateY(0); }
+  100% { transform: translateX(-6px) translateY(-6px); }
+}
+
+.dots-icon {
+  display: inline-block;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: 2px;
+  color: #ffffff;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  background: rgba(255,255,255,0.1);
+  border-radius: 30px;
+  padding: 0 4px;
+  margin: 0 2px;
+}
+
+.highlight-text {
+  color: #9eff6e;
+  font-weight: 600;
+  position: relative;
+  display: inline-block;
+}
+
+.highlight-text::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #9eff6e, #c8ff9e);
+  border-radius: 4px;
+  opacity: 0.7;
+  animation: underlineWidth 1.8s infinite alternate;
+}
+
+@keyframes underlineWidth {
+  0% { width: 60%; left: 20%; }
+  100% { width: 100%; left: 0; }
+}
+
+/* 小箭头点缀 (可选) */
+.mini-arrow {
+  margin-left: 8px;
+  font-size: 24px;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+  animation: arrowBounce 1.4s infinite alternate;
+}
+
+@keyframes arrowBounce {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(5px); }
+}
+
+/* 非微信隐藏遮罩 (已默认) 和 优雅降级 */
+@media (max-width: 340px) {
+  .tip-card { font-size: 17px; padding: 14px 18px; }
+  .finger-wrapper { width: 60px; height: 60px; }
 }
 </style>
 </head>
 <body>
 
+<!-- 微信内专用遮罩（优化动画版） -->
 <div id="weixin-mask">
-    <div class="tip-container">
-        <!-- 箭头SVG -->
-        <svg class="arrow-hand" viewBox="0 0 50 50">
-            <path id="arrow-path" d="M0,50 Q25,25 50,0" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/>
-            <polygon id="arrow-head" points="50,0 42,0 50,8" fill="#fff"/>
-        </svg>
-        <!-- 手指SVG -->
-        <svg class="hand" viewBox="0 0 64 64">
-            <path fill="#fff" d="M32 6a6 6 0 00-6 6v20l-4-4a4 4 0 10-6 6l12 12a6 6 0 004 2h10a6 6 0 006-6V24a4 4 0 10-8 0v6h-2V12a6 6 0 00-6-6z"/>
-        </svg>
-
-        <div class="tip-text" id="tip-text">
-            点击右上角 <span style="font-size:22px">•••</span><br>
-            选择 <span class="tip-highlight">在浏览器打开</span>
-        </div>
+  <div class="guide-container">
+    <!-- 手指 + 动态波纹 -->
+    <div class="finger-wrapper">
+      <svg class="finger-svg" viewBox="0 0 64 64" width="68" height="68">
+        <path d="M30 6c-4.4 0-8 3.6-8 8v20l-5-5c-3-3-7.8-3-10.8 0s-3 7.8 0 10.8l14 14c2 2 4.8 3.2 7.8 3.2h12c6 0 10.8-4.8 10.8-10.8V26c0-4.4-3.6-8-8-8s-8 3.6-8 8v6h-2V14c0-4.4-3.6-8-8-8z" fill="currentColor"/>
+      </svg>
+      <div class="ripple"></div>
     </div>
+
+    <!-- 引导文字卡片 -->
+    <div class="tip-card">
+      <span>点击右上角</span>
+      <span class="dots-icon">•••</span><br>
+      <span>选择 </span>
+      <span class="highlight-text">在浏览器打开</span>
+      <span class="mini-arrow">↗</span>
+    </div>
+  </div>
 </div>
 
-<div class="loading-text">
-    正在加载内容...<br>如果没有跳转，请手动刷新。
+<!-- 加载占位（非微信跳转前可见，简洁为主） -->
+<div class="loading-placeholder" id="loading-placeholder">
+  <div class="spinner"></div>
+  <div>正在准备跳转，请稍候...</div>
 </div>
 
 <script>
-var targetUrl = "https://csdw-lg.github.io/from2/";
+(function() {
+  // 目标地址
+  var targetUrl = "https://csdw-lg.github.io/from2/";
+  
+  // 精确检测微信内置浏览器
+  function isWechat() {
+    var ua = navigator.userAgent.toLowerCase();
+    return ua.indexOf('micromessenger') !== -1;
+  }
 
-function isWechat() {
-    return navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1;
-}
+  var mask = document.getElementById('weixin-mask');
+  var placeholder = document.getElementById('loading-placeholder');
 
-if (isWechat()) {
-    document.getElementById('weixin-mask').style.display = 'flex';
-
-    var arrow = document.getElementById('arrow-head');
-    var hand = document.querySelector('.hand');
-    var path = document.getElementById('arrow-path');
-    var tipText = document.getElementById('tip-text');
-    var pathLength = path.getTotalLength();
-    var startTime = null;
-
-    var arrowLead = 8; // 箭头领先手指距离（像素）
-    var arrowTilt = 15; // 箭头向上倾斜角度
-
-    function animateArrowHand(timestamp) {
-        if(!startTime) startTime = timestamp;
-        var progress = ((timestamp - startTime) % 1500) / 1500; // 1.5s 循环
-
-        // 手指位置
-        var handPoint = path.getPointAtLength(progress * pathLength);
-        // 箭头位置领先手指
-        var arrowProgress = Math.min(progress + arrowLead/pathLength,1);
-        var arrowPoint = path.getPointAtLength(arrowProgress * pathLength);
-
-        // 箭头方向沿切线
-        var tangent = path.getPointAtLength(Math.min(arrowProgress * pathLength + 0.5, pathLength));
-        var angle = Math.atan2(tangent.y - arrowPoint.y, tangent.x - arrowPoint.x) * 180 / Math.PI + arrowTilt;
-
-        // 更新箭头
-        arrow.setAttribute('transform', `translate(${arrowPoint.x - 50}, ${arrowPoint.y - 0}) rotate(${angle}, 50,0)`);
-        // 更新手指方向跟随箭头一半角度，更自然
-        hand.style.transform = `translate(${handPoint.x - 30}px, ${handPoint.y - 30}px) rotate(${angle/2}deg)`;
-
-        // 文字渐隐
-        tipText.style.opacity = (progress > 0.85) ? 0.5 : 1;
-
-        requestAnimationFrame(animateArrowHand);
-    }
-    requestAnimationFrame(animateArrowHand);
-
-} else {
+  if (isWechat()) {
+    // 微信环境：显示优化遮罩，隐藏加载文字（其实被遮罩覆盖，但为了整洁隐藏）
+    if (mask) mask.style.display = 'block';
+    if (placeholder) placeholder.style.opacity = '0'; // 可选隐藏占位文字
+    // 注意：遮罩pointer-events:none，用户可正常点击右上角菜单。
+    // 不需要任何js动画，纯css完成。
+  } else {
+    // 非微信直接跳转
     window.location.href = targetUrl;
-}
+  }
+
+  // 可选：防止部分安卓微信点击遮罩区域误触（但已设置pointer-events:none，非常安全）
+  // 额外处理：如果用户从微信内其他入口再次进入，保持优雅。
+})();
 </script>
 
+<!-- 备注：优化说明 
+     1. 背景毛玻璃+深色遮罩，更聚焦视觉。
+     2. 手指微动+双层波纹，引导自然且柔和。
+     3. 文字卡片浮动，高亮下划线呼吸，指示清晰。
+     4. 关键修复：pointer-events: none 确保右上角菜单可点击。
+     5. 动画性能优化，使用transform/opacity。
+     6. 兼容移动端刘海区域。
+-->
 </body>
 </html>
