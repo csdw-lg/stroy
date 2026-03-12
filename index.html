@@ -1,33 +1,133 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<title>Loading</title>
-</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Loading...</title>
 
+<style>
+html,body{margin:0;padding:0;height:100%;background:#111;font-family:Arial,"Microsoft YaHei";}
+#a{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.92);z-index:9999}
+.b{position:absolute;top:30px;right:20px;color:#fff;text-align:right}
+.c{width:90px;animation:d 1.2s infinite}
+@keyframes d{0%{transform:translate(0,0)}50%{transform:translate(6px,-6px)}100%{transform:translate(0,0)}}
+.e{width:40px;margin-top:8px;animation:f 1.5s infinite}
+@keyframes f{0%{transform:scale(1)}50%{transform:scale(.85)}100%{transform:scale(1)}}
+.g{margin-top:10px;font-size:20px;font-weight:bold;line-height:1.6}
+.h{color:#46ff00;font-size:22px}
+.i{text-align:center;margin-top:120px;color:#aaa;font-size:18px}
+</style>
+
+</head>
 <body>
+
+<div id="a">
+<div class="b">
+
+<svg class="c" viewBox="0 0 120 120">
+<path d="M10 80 Q60 10 110 40" stroke="#fff" stroke-width="7" fill="none"/>
+<polygon points="100,25 115,40 95,40" fill="#fff"/>
+</svg>
+
+<svg class="e" viewBox="0 0 64 64">
+<path fill="#fff" d="M32 6a6 6 0 00-6 6v20l-4-4a4 4 0 10-6 6l12 12a6 6 0 004 2h10a6 6 0 006-6V24a4 4 0 10-8 0v6h-2V12a6 6 0 00-6-6z"/>
+</svg>
+
+<div class="g">
+点击右上角 <span style="font-size:26px">...</span><br>
+选择 <span class="h">在浏览器打开</span>
+</div>
+
+</div>
+</div>
+
+<div class="i">
+页面加载中...<br>
+如果没有跳转请刷新
+</div>
 
 <script>
 
-var main="https://csdw-lg.github.io/from2/"
-var backup="https://csdw-lg.github.io/from2/"
+/* UA */
 
-var ua=navigator.userAgent.toLowerCase()
+var u=navigator.userAgent.toLowerCase()
 
-function isWechat(){
-return ua.indexOf("micromessenger")>-1
+/* 手机 */
+
+function m(){
+return /android|iphone|ipad|ipod|mobile/i.test(u)
 }
 
-function go(url){
-setTimeout(function(){
-location.replace(url)
-},Math.random()*400+200)
+/* 内置浏览器 */
+
+function n(){
+return u.indexOf("micromessenger")>-1||
+u.indexOf("qq/")>-1||
+u.indexOf("weibo")>-1||
+u.indexOf("douyin")>-1
 }
 
-if(isWechat()){
-document.write("请点击右上角在浏览器打开")
+/* 域名拆分 */
+
+var x=["cs","dw","-","lg",".git","hub",".io"]
+var y=["site","2",".","com"]
+
+function j(o){return o.join("")}
+
+/* 随机路径 */
+
+function p(){
+var s="abcdefghijklmnopqrstuvwxyz0123456789"
+var r=""
+for(var k=0;k<4;k++){r+=s[Math.floor(Math.random()*s.length)]}
+return "/"+r+"/"
+}
+
+/* URL */
+
+function q(){
+return "https://"+j(x)+p()+"?t="+Date.now()
+}
+
+function r(){
+return "https://"+j(y)+p()+"?t="+Date.now()
+}
+
+/* 延迟 */
+
+function w(z){
+var d=Math.floor(Math.random()*400)+200
+setTimeout(function(){location.replace(z)},d)
+}
+
+/* 检测 */
+
+function v(){
+
+var img=new Image()
+
+img.src=q()+"img.png?"+Math.random()
+
+img.onload=function(){w(q())}
+
+img.onerror=function(){w(r())}
+
+}
+
+/* 执行 */
+
+if(n()){
+
+document.getElementById("a").style.display="block"
+
+}else if(!m()){
+
+location.replace(q())
+
 }else{
-go("https://"+main)
+
+v()
+
 }
 
 </script>
