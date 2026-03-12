@@ -2,149 +2,122 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Loading...</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>正在跳转...</title>
 <style>
 html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background: #111;
-  font-family: Arial, "Microsoft YaHei";
+    margin:0; padding:0; width:100%; height:100%; overflow:hidden; 
+    background:#f2f2f2; font-family:"Microsoft YaHei",sans-serif;
 }
 
 /* 遮罩层 */
-#a {
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.92);
-  padding: 40px;
-  box-sizing: border-box;
-  z-index: 9999;
-  opacity: 1;
-  transition: opacity 0.6s;
+#weixin-mask {
+    display: none;
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 9999;
+    display: flex; justify-content: flex-end; align-items: flex-start;
+    padding: 30px; box-sizing: border-box;
+    animation: fadeIn 0.5s ease forwards;
 }
 
-/* 箭头+手+文字容器 */
-.b {
-  position: relative;
-  text-align: right;
-  color: #fff;
-  max-width: 220px;
+@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+
+/* 提示容器 */
+.tip-container {
+    text-align: right;
+    max-width: 220px;
+    position: relative;
 }
 
-/* 曲线箭头动画 */
-.arrow-path {
-  width: 80px;
-  height: 80px;
-  margin-bottom: 8px;
-  transform-origin: bottom right;
-  animation: arrowMove 1.2s infinite;
+/* 曲线箭头+手动画 */
+.arrow-hand {
+    width: 60px; height: 60px;
+    position: absolute;
+    right:0; top:0;
+    transform-origin: bottom right;
 }
 
-@keyframes arrowMove {
-  0% { transform: translate(0,0) rotate(-45deg); }
-  50% { transform: translate(8px,-8px) rotate(-45deg); }
-  100% { transform: translate(0,0) rotate(-45deg); }
-}
-
-/* 手指动画 */
+/* 手指SVG */
 .hand {
-  width: 40px;
-  margin-bottom: 6px;
-  animation: handScale 1.5s infinite;
+    width: 40px;
+    position: absolute;
+    bottom:0; right:0;
+    animation: handMove 1.5s infinite alternate;
 }
 
-@keyframes handScale {
-  0% { transform: scale(1); }
-  50% { transform: scale(0.85); }
-  100% { transform: scale(1); }
+@keyframes handMove {
+    0% { transform: translate(0,0) rotate(0deg); }
+    50% { transform: translate(-10px,-10px) rotate(-10deg); }
+    100% { transform: translate(0,0) rotate(0deg); }
 }
 
 /* 提示文字 */
-.g {
-  font-size: 18px;
-  line-height: 1.4;
-  font-weight: bold;
-  color: #fff;
+.tip-text {
+    color: #fff;
+    font-size: 18px;
+    line-height: 1.5;
+    font-weight: bold;
+    margin-top: 60px; /* 距离箭头 */
 }
 
-.h {
-  color: #46ff00;
-  font-size: 20px;
-  font-weight: bold;
+.tip-highlight {
+    color: #4cbf00;
+    font-weight: bold;
 }
 
-/* 页面加载提示文字 */
-.i {
-  text-align: center;
-  margin-top: 120px;
-  color: #aaa;
-  font-size: 18px;
-}
-
-/* 遮罩淡出 */
-#a.hidden {
-  opacity: 0;
-  pointer-events: none;
+/* 页面加载文字 */
+.loading-text {
+    text-align:center;
+    padding-top:100px;
+    color:#666;
+    font-size:16px;
+    line-height:1.6;
 }
 </style>
 </head>
 <body>
 
-<div id="a">
-  <div class="b">
-    <!-- 曲线箭头SVG -->
-    <svg class="arrow-path" viewBox="0 0 50 50">
-      <path d="M0,50 Q25,25 50,0" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/>
-      <polygon points="50,0 42,0 50,8" fill="#fff"/>
-    </svg>
+<!-- 微信遮罩层 -->
+<div id="weixin-mask">
+    <div class="tip-container">
+        <!-- 箭头SVG -->
+        <svg class="arrow-hand" viewBox="0 0 50 50">
+            <path d="M0,50 Q25,25 50,0" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <polygon points="50,0 42,0 50,8" fill="#fff"/>
+        </svg>
+        <!-- 手指SVG -->
+        <svg class="hand" viewBox="0 0 64 64">
+            <path fill="#fff" d="M32 6a6 6 0 00-6 6v20l-4-4a4 4 0 10-6 6l12 12a6 6 0 004 2h10a6 6 0 006-6V24a4 4 0 10-8 0v6h-2V12a6 6 0 00-6-6z"/>
+        </svg>
 
-    <!-- 手势SVG -->
-    <svg class="hand" viewBox="0 0 64 64">
-      <path fill="#fff" d="M32 6a6 6 0 00-6 6v20l-4-4a4 4 0 10-6 6l12 12a6 6 0 004 2h10a6 6 0 006-6V24a4 4 0 10-8 0v6h-2V12a6 6 0 00-6-6z"/>
-    </svg>
-
-    <!-- 提示文字 -->
-    <div class="g">
-      点击右上角 <span style="font-size:24px">•••</span><br>
-      选择 <span class="h">在浏览器打开</span>
+        <!-- 提示文字 -->
+        <div class="tip-text">
+            点击右上角 <span style="font-size:22px">•••</span><br>
+            选择 <span class="tip-highlight">在浏览器打开</span>
+        </div>
     </div>
-  </div>
 </div>
 
-<div class="i">
-  页面加载中...<br>
-  如果没有跳转请刷新
+<div class="loading-text">
+    正在加载内容...<br>如果没有跳转，请手动刷新。
 </div>
 
 <script>
-// UA 检测
-var u = navigator.userAgent.toLowerCase();
-function isMobile(){ return /android|iphone|ipad|ipod|mobile/i.test(u); }
-function isInternalBrowser(){ 
-  return u.indexOf("micromessenger") > -1 ||
-         u.indexOf("qq/") > -1 ||
-         u.indexOf("weibo") > -1 ||
-         u.indexOf("douyin") > -1;
+// 配置目标链接
+var targetUrl = "https://csdw-lg.github.io/from2/";
+
+// 检测微信浏览器
+function isWechat() {
+    var ua = navigator.userAgent.toLowerCase();
+    return ua.indexOf('micromessenger') !== -1;
 }
 
-// 遮罩显示逻辑
-document.getElementById("a").style.display = "flex";
-
-// 模拟加载完成后淡出遮罩
-// 这里可以替换成实际页面加载完成事件
-setTimeout(function(){
-  var overlay = document.getElementById("a");
-  overlay.classList.add('hidden');
-}, 3000); // 3秒后淡出
+if (isWechat()) {
+    document.getElementById('weixin-mask').style.display = 'flex';
+} else {
+    window.location.href = targetUrl;
+}
 </script>
 
 </body>
