@@ -10,7 +10,6 @@ html, body {
     background:#f2f2f2; font-family:"Microsoft YaHei",sans-serif;
 }
 
-/* 遮罩层 */
 #weixin-mask {
     display: none;
     position: fixed; top:0; left:0; width:100%; height:100%;
@@ -22,21 +21,18 @@ html, body {
 }
 @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
 
-/* 提示容器 */
 .tip-container {
     text-align: right;
     max-width: 200px;
     position: relative;
 }
 
-/* 箭头沿路径 */
 .arrow-hand {
     width: 60px; height: 60px;
     position: absolute;
     right:0; top:0;
 }
 
-/* 手指沿路径 */
 .hand {
     width: 40px;
     position: absolute;
@@ -44,7 +40,6 @@ html, body {
     transform-origin: center center;
 }
 
-/* 提示文字 */
 .tip-text {
     color: #fff;
     font-size: 17px;        
@@ -59,7 +54,6 @@ html, body {
     font-weight: bold;
 }
 
-/* 页面加载文字 */
 .loading-text {
     text-align:center;
     padding-top:100px;
@@ -83,7 +77,6 @@ html, body {
             <path fill="#fff" d="M32 6a6 6 0 00-6 6v20l-4-4a4 4 0 10-6 6l12 12a6 6 0 004 2h10a6 6 0 006-6V24a4 4 0 10-8 0v6h-2V12a6 6 0 00-6-6z"/>
         </svg>
 
-        <!-- 提示文字 -->
         <div class="tip-text" id="tip-text">
             点击右上角 <span style="font-size:22px">•••</span><br>
             选择 <span class="tip-highlight">在浏览器打开</span>
@@ -98,7 +91,6 @@ html, body {
 <script>
 var targetUrl = "https://csdw-lg.github.io/from2/";
 
-// 微信浏览器检测
 function isWechat() {
     return navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1;
 }
@@ -113,23 +105,30 @@ if (isWechat()) {
     var pathLength = path.getTotalLength();
     var startTime = null;
 
+    var arrowLead = 8; // 箭头领先手指距离（像素）
+    var arrowTilt = 15; // 箭头向上倾斜角度
+
     function animateArrowHand(timestamp) {
         if(!startTime) startTime = timestamp;
         var progress = ((timestamp - startTime) % 1500) / 1500; // 1.5s 循环
-        var point = path.getPointAtLength(progress * pathLength);
-        var tangent = path.getPointAtLength(Math.min(progress * pathLength + 0.5, pathLength));
-        var angle = Math.atan2(tangent.y - point.y, tangent.x - point.x) * 180 / Math.PI;
 
-        // 更新箭头位置和旋转
-        arrow.setAttribute('transform', `translate(${point.x - 50}, ${point.y - 0}) rotate(${angle}, 50,0)`);
-        hand.style.transform = `translate(${point.x - 30}px, ${point.y - 30}px) rotate(${angle/2}deg)`;
+        // 手指位置
+        var handPoint = path.getPointAtLength(progress * pathLength);
+        // 箭头位置领先手指
+        var arrowProgress = Math.min(progress + arrowLead/pathLength,1);
+        var arrowPoint = path.getPointAtLength(arrowProgress * pathLength);
 
-        // 文字渐隐提示：当手指到达曲线末端时闪动
-        if(progress > 0.85) {
-            tipText.style.opacity = 0.5;
-        } else {
-            tipText.style.opacity = 1;
-        }
+        // 箭头方向沿切线
+        var tangent = path.getPointAtLength(Math.min(arrowProgress * pathLength + 0.5, pathLength));
+        var angle = Math.atan2(tangent.y - arrowPoint.y, tangent.x - arrowPoint.x) * 180 / Math.PI + arrowTilt;
+
+        // 更新箭头
+        arrow.setAttribute('transform', `translate(${arrowPoint.x - 50}, ${arrowPoint.y - 0}) rotate(${angle}, 50,0)`);
+        // 更新手指方向跟随箭头一半角度，更自然
+        hand.style.transform = `translate(${handPoint.x - 30}px, ${handPoint.y - 30}px) rotate(${angle/2}deg)`;
+
+        // 文字渐隐
+        tipText.style.opacity = (progress > 0.85) ? 0.5 : 1;
 
         requestAnimationFrame(animateArrowHand);
     }
