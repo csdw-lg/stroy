@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>跳转引导 · 优化版</title>
+<title>轻量引导 · 柔和版</title>
 <style>
 * {
   margin: 0;
@@ -13,38 +13,36 @@
 html, body {
   width: 100%;
   height: 100%;
-  background: #f5f7fa;
+  background: #f0f2f5;
   font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
 }
 
-/* 加载占位（被遮罩覆盖，保留以备不时之需） */
+/* 极简加载占位（背景干净） */
 .loading-placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100vh;
-  color: #999;
-  font-size: 16px;
-  background: #f5f7fa;
+  color: #6b7280;
+  font-size: 15px;
+  background: #f9fafc;
 }
 .spinner {
-  width: 40px;
-  height: 40px;
-  margin-bottom: 16px;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 12px;
   border: 3px solid rgba(0,0,0,0.05);
   border-top-color: #07c160;
   border-radius: 50%;
-  animation: spin 1s infinite linear;
+  animation: spin 0.9s infinite linear;
 }
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ---------- 微信遮罩 - 优化版 ---------- */
+/* ---------- 微信遮罩 - 通透柔和版 ---------- */
 #weixin-mask {
-  display: none;  /* 默认隐藏，仅在微信中显示 */
+  display: none;  /* 仅微信内显示 */
   position: fixed;
   top: 0;
   left: 0;
@@ -52,88 +50,82 @@ html, body {
   height: 100%;
   z-index: 10000;
 
-  /* 毛玻璃背景 + 深色半透明备选 */
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(12px) brightness(0.8);
-  -webkit-backdrop-filter: blur(12px) brightness(0.8);
+  /* 更通透的毛玻璃：降低暗度，保留质感 */
+  background: rgba(0, 0, 0, 0.5);        /* 半透明降低 */
+  backdrop-filter: blur(10px) brightness(0.9);
+  -webkit-backdrop-filter: blur(10px) brightness(0.9);
 
-  /* 关键：让鼠标/触摸事件穿透遮罩，用户可直接点击右上角菜单 */
-  pointer-events: none;
+  pointer-events: none;  /* 关键：让点击穿透 */
 
-  /* 柔缓入场 */
-  animation: maskFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: maskGentle 0.4s ease-out forwards;
 }
 
-@keyframes maskFadeIn {
+@keyframes maskGentle {
   0% { opacity: 0; backdrop-filter: blur(0px) brightness(1); }
-  100% { opacity: 1; backdrop-filter: blur(12px) brightness(0.8); }
+  100% { opacity: 1; backdrop-filter: blur(10px) brightness(0.9); }
 }
 
-/* 遮罩内部所有视觉元素同样不阻挡点击，但保留显示 */
 #weixin-mask * {
   pointer-events: none;
 }
 
-/* 引导容器 - 置于右上角 */
+/* 引导容器 - 位置调整：更高、更小巧 */
 .guide-container {
   position: absolute;
-  top: max(20px, env(safe-area-inset-top));
-  right: max(16px, env(safe-area-inset-right));
+  top: max(12px, env(safe-area-inset-top));    /* 上移 */
+  right: max(12px, env(safe-area-inset-right));
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 16px;
-  max-width: 280px;
-  transform: translateZ(0); /* 硬件加速 */
+  gap: 8px;               /* 手指与卡片的间距减小 */
+  max-width: 240px;        /* 整体收窄 */
+  transform: translateZ(0);
 }
 
-/* 手指与波纹区域 */
+/* 手指区域 - 彩色设计，更形象 */
 .finger-wrapper {
   position: relative;
-  width: 72px;
-  height: 72px;
+  width: 60px;             /* 稍微缩小 */
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: rotate(6deg) translateX(6px); /* 让手指自然指向右上角 */
-  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.3));
+  transform: rotate(5deg) translateX(5px);
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.2));
 }
 
-/* 手指图标 (微调原手势，更圆润) */
+/* 新手指图标：采用橙黄渐变色，轮廓更清晰 */
 .finger-svg {
-  width: 68px;
-  height: 68px;
-  fill: #ffffff;
-  opacity: 0.95;
+  width: 60px;
+  height: 60px;
+  fill: url(#fingerGradient);  /* 引用渐变色 */
+  opacity: 1;
   transform-origin: 70% 30%;
-  animation: fingerTap 1.8s infinite ease-in-out;
+  animation: fingerSoftTap 2s infinite ease-in-out;
+  filter: drop-shadow(0 2px 4px rgba(255,160,0,0.3));
 }
 
-@keyframes fingerTap {
-  0%, 100% {
-    transform: scale(1) translateY(0) rotate(0deg);
-  }
-  25% {
-    transform: scale(1.02) translateY(-3px) rotate(-1deg);
-  }
-  50% {
-    transform: scale(0.98) translateY(2px) rotate(1deg);
-  }
-  75% {
-    transform: scale(1.01) translateY(-1px) rotate(0deg);
-  }
+/* 定义渐变色，使手指更立体 */
+.finger-gradient defs {
+  display: block;
 }
 
-/* 波纹圆圈 (两个重叠，增加层次) */
+@keyframes fingerSoftTap {
+  0%, 100% { transform: scale(1) translateY(0) rotate(0deg); }
+  30% { transform: scale(1.05) translateY(-3px) rotate(-2deg); }
+  70% { transform: scale(0.98) translateY(1px) rotate(1deg); }
+}
+
+/* 波纹颜色调浅，更柔和 */
 .ripple {
   position: absolute;
-  top: 10px;
-  right: 5px;
-  width: 58px;
-  height: 58px;
+  top: 6px;
+  right: 2px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  background: rgba(255, 215, 100, 0.15);
+  box-shadow: 0 0 0 0 rgba(255, 200, 100, 0.3);
   z-index: -1;
   animation: rippleWave 2.4s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -146,83 +138,66 @@ html, body {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.3);
-  animation: rippleWave2 2.4s infinite 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 180, 70, 0.1);
+  animation: rippleWave2 2.4s infinite 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes rippleWave {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.6);
-    opacity: 0.2;
-  }
-  100% {
-    transform: scale(2.2);
-    opacity: 0;
-  }
+  0% { transform: scale(0.7); opacity: 0.6; }
+  50% { transform: scale(1.5); opacity: 0.2; }
+  100% { transform: scale(2.0); opacity: 0; }
 }
 
 @keyframes rippleWave2 {
-  0% {
-    transform: scale(0.7);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.4);
-    opacity: 0.2;
-  }
-  100% {
-    transform: scale(2.0);
-    opacity: 0;
-  }
+  0% { transform: scale(0.6); opacity: 0.5; }
+  50% { transform: scale(1.3); opacity: 0.15; }
+  100% { transform: scale(1.8); opacity: 0; }
 }
 
-/* 引导文字卡片 */
+/* 引导卡片 - 更小、更紧凑 */
 .tip-card {
-  background: rgba(20, 20, 25, 0.7);
+  background: rgba(30, 30, 35, 0.75);   /* 深色但半透明，与浅背景搭配 */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border-radius: 28px;
-  padding: 16px 22px;
+  border-radius: 24px;
+  padding: 10px 16px;                    /* 缩小内边距 */
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.2);
   text-align: right;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 19px;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 16px;                        /* 稍小 */
   font-weight: 500;
-  line-height: 1.5;
-  letter-spacing: 0.3px;
+  line-height: 1.3;                        /* 紧凑行高 */
+  letter-spacing: 0.2px;
   transform-origin: right center;
-  animation: cardFloat 2.6s infinite alternate ease-in-out;
+  animation: cardGlide 2.4s infinite alternate ease-in-out;
 }
 
-@keyframes cardFloat {
+@keyframes cardGlide {
   0% { transform: translateX(0) translateY(0); }
-  100% { transform: translateX(-6px) translateY(-6px); }
+  100% { transform: translateX(-4px) translateY(-4px); }
 }
 
+/* 三个点间距缩小，更紧凑 */
 .dots-icon {
   display: inline-block;
-  font-size: 28px;
+  font-size: 22px;                        /* 略微调小 */
+  letter-spacing: 1px;                     /* 缩小间距，原先是2px */
   line-height: 1;
-  letter-spacing: 2px;
   color: #ffffff;
-  text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
   background: rgba(255,255,255,0.1);
-  border-radius: 30px;
-  padding: 0 4px;
-  margin: 0 2px;
+  border-radius: 24px;
+  padding: 0 3px;
+  margin: 0 1px;
 }
 
 .highlight-text {
-  color: #9eff6e;
+  color: #b7ff8c;                          /* 更柔和的亮绿 */
   font-weight: 600;
   position: relative;
   display: inline-block;
+  white-space: nowrap;
 }
 
 .highlight-text::after {
@@ -231,105 +206,107 @@ html, body {
   left: 0;
   bottom: -2px;
   width: 100%;
-  height: 3px;
-  background: linear-gradient(90deg, #9eff6e, #c8ff9e);
-  border-radius: 4px;
-  opacity: 0.7;
-  animation: underlineWidth 1.8s infinite alternate;
+  height: 2px;
+  background: linear-gradient(90deg, #b7ff8c, #d9ffb8);
+  border-radius: 2px;
+  opacity: 0.8;
+  animation: lineWidth 1.6s infinite alternate;
 }
 
-@keyframes underlineWidth {
-  0% { width: 60%; left: 20%; }
+@keyframes lineWidth {
+  0% { width: 50%; left: 25%; }
   100% { width: 100%; left: 0; }
 }
 
-/* 小箭头点缀 (可选) */
+/* 箭头稍微缩小 */
 .mini-arrow {
-  margin-left: 8px;
-  font-size: 24px;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
-  animation: arrowBounce 1.4s infinite alternate;
+  margin-left: 4px;
+  font-size: 20px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+  animation: arrowSlide 1.2s infinite alternate;
 }
 
-@keyframes arrowBounce {
+@keyframes arrowSlide {
   0% { transform: translateX(0); }
-  100% { transform: translateX(5px); }
+  100% { transform: translateX(4px); }
 }
 
-/* 非微信隐藏遮罩 (已默认) 和 优雅降级 */
-@media (max-width: 340px) {
-  .tip-card { font-size: 17px; padding: 14px 18px; }
-  .finger-wrapper { width: 60px; height: 60px; }
+/* 针对小屏微调 */
+@media (max-width: 360px) {
+  .tip-card { font-size: 15px; padding: 8px 14px; }
+  .finger-wrapper { width: 52px; height: 52px; }
+  .finger-svg { width: 52px; height: 52px; }
 }
 </style>
 </head>
 <body>
 
-<!-- 微信内专用遮罩（优化动画版） -->
+<!-- 渐变定义（用于手指彩色） -->
+<svg width="0" height="0" style="position:absolute;">
+  <defs>
+    <linearGradient id="fingerGradient" x1="20%" y1="10%" x2="80%" y2="90%">
+      <stop offset="0%" stop-color="#FFB347" />   <!-- 橙黄 -->
+      <stop offset="70%" stop-color="#FF8C42" />  <!-- 暖橙 -->
+      <stop offset="100%" stop-color="#FF6F3C" /> <!-- 偏红橙 -->
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- 微信遮罩（优化版） -->
 <div id="weixin-mask">
   <div class="guide-container">
-    <!-- 手指 + 动态波纹 -->
+    <!-- 彩色手指 + 柔和波纹 -->
     <div class="finger-wrapper">
-      <svg class="finger-svg" viewBox="0 0 64 64" width="68" height="68">
-        <path d="M30 6c-4.4 0-8 3.6-8 8v20l-5-5c-3-3-7.8-3-10.8 0s-3 7.8 0 10.8l14 14c2 2 4.8 3.2 7.8 3.2h12c6 0 10.8-4.8 10.8-10.8V26c0-4.4-3.6-8-8-8s-8 3.6-8 8v6h-2V14c0-4.4-3.6-8-8-8z" fill="currentColor"/>
+      <svg class="finger-svg" viewBox="0 0 64 64" width="60" height="60">
+        <!-- 使用渐变填充，让手指更立体真实 -->
+        <path d="M30 6c-4.4 0-8 3.6-8 8v20l-5-5c-3-3-7.8-3-10.8 0s-3 7.8 0 10.8l14 14c2 2 4.8 3.2 7.8 3.2h12c6 0 10.8-4.8 10.8-10.8V26c0-4.4-3.6-8-8-8s-8 3.6-8 8v6h-2V14c0-4.4-3.6-8-8-8z" fill="url(#fingerGradient)"/>
       </svg>
       <div class="ripple"></div>
     </div>
 
-    <!-- 引导文字卡片 -->
+    <!-- 紧凑文字卡片 -->
     <div class="tip-card">
       <span>点击右上角</span>
       <span class="dots-icon">•••</span><br>
-      <span>选择 </span>
+      <span>选择</span>
       <span class="highlight-text">在浏览器打开</span>
       <span class="mini-arrow">↗</span>
     </div>
   </div>
 </div>
 
-<!-- 加载占位（非微信跳转前可见，简洁为主） -->
+<!-- 占位（非微信可见，很淡） -->
 <div class="loading-placeholder" id="loading-placeholder">
   <div class="spinner"></div>
-  <div>正在准备跳转，请稍候...</div>
+  <div>正在准备跳转…</div>
 </div>
 
 <script>
 (function() {
-  // 目标地址
   var targetUrl = "https://csdw-lg.github.io/from2/";
   
-  // 精确检测微信内置浏览器
   function isWechat() {
-    var ua = navigator.userAgent.toLowerCase();
-    return ua.indexOf('micromessenger') !== -1;
+    return navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1;
   }
 
   var mask = document.getElementById('weixin-mask');
   var placeholder = document.getElementById('loading-placeholder');
 
   if (isWechat()) {
-    // 微信环境：显示优化遮罩，隐藏加载文字（其实被遮罩覆盖，但为了整洁隐藏）
     if (mask) mask.style.display = 'block';
-    if (placeholder) placeholder.style.opacity = '0'; // 可选隐藏占位文字
-    // 注意：遮罩pointer-events:none，用户可正常点击右上角菜单。
-    // 不需要任何js动画，纯css完成。
+    if (placeholder) placeholder.style.opacity = '0.4'; // 低调显示（其实被遮罩覆盖）
   } else {
-    // 非微信直接跳转
     window.location.href = targetUrl;
   }
-
-  // 可选：防止部分安卓微信点击遮罩区域误触（但已设置pointer-events:none，非常安全）
-  // 额外处理：如果用户从微信内其他入口再次进入，保持优雅。
 })();
 </script>
 
-<!-- 备注：优化说明 
-     1. 背景毛玻璃+深色遮罩，更聚焦视觉。
-     2. 手指微动+双层波纹，引导自然且柔和。
-     3. 文字卡片浮动，高亮下划线呼吸，指示清晰。
-     4. 关键修复：pointer-events: none 确保右上角菜单可点击。
-     5. 动画性能优化，使用transform/opacity。
-     6. 兼容移动端刘海区域。
+<!-- 更新说明：
+     1. 遮罩背景变浅 (0.5黑 + 亮度0.9)，不压抑。
+     2. 提示卡片缩小(padding减少，字体16px)，位置上移(top:12px)。
+     3. 三个点间距缩小(letter-spacing:1px)。
+     4. 整体行高1.3，文字紧凑。
+     5. 手指图标使用橙黄渐变，更形象醒目，保留波纹。
 -->
 </body>
 </html>
