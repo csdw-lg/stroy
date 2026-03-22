@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>请用外部浏览器打开</title>
 
+<!-- GoatCounter 统计 -->
+<script>
+  // 创建异步加载脚本函数
+  function loadGoatCounter(callback){
+    var script = document.createElement('script');
+    script.src = "//gc.zgo.at/count.js";
+    script.async = true;
+    script.onload = callback; // 脚本加载完成后执行
+    document.head.appendChild(script);
+  }
+</script>
+
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html,body{width:100%;height:100%;background:#f0f2f5;font-family:"Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;overflow:hidden;}
@@ -46,7 +58,7 @@ html,body{width:100%;height:100%;background:#f0f2f5;font-family:"Microsoft YaHei
       </svg>
       <div class="ripple"></div>
     </div>
-    <div class="tip-card" id="wechat-open-card">
+    <div class="tip-card">
       点击右上角 <span class="dots-icon">•••</span><br>
       选择 <span class="highlight-text">在浏览器打开</span> <span class="mini-arrow">↗</span>
     </div>
@@ -63,7 +75,6 @@ html,body{width:100%;height:100%;background:#f0f2f5;font-family:"Microsoft YaHei
   var targetUrl = "https://csdw-lg.github.io/from2/";
   var mask = document.getElementById('weixin-mask');
   var placeholder = document.getElementById('loading-placeholder');
-  var wechatCard = document.getElementById('wechat-open-card');
 
   function isWechat(){ return navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1; }
 
@@ -75,36 +86,28 @@ html,body{width:100%;height:100%;background:#f0f2f5;font-family:"Microsoft YaHei
         if(window.goatcounter && window.goatcounter.count){
           window.goatcounter.count({path:name});
         }
-      },50);
+      },300);
     }
   }
 
-  // 异步加载 GoatCounter
-  var script = document.createElement('script');
-  script.src = "//gc.zgo.at/count.js";
-  script.async = true;
-  script.onload = function(){
+  // 先加载 GoatCounter
+  loadGoatCounter(function(){
+    // 页面进入
     countEvent('page_enter');
 
     if(isWechat()){
       if(mask) mask.style.display='block';
       if(placeholder) placeholder.style.opacity='0.4';
-      countEvent('wechat_open');
-
-      // 微信内点击“在浏览器打开”统计
-      wechatCard.addEventListener('click', function(){
-        countEvent('wechat_jump'); // 微信跳转统计
-      });
-
+      countEvent('wechat_open'); // 微信访问统计
     } else {
-      countEvent('browser_open');
+      countEvent('browser_open'); // 浏览器访问统计
+      // 延迟跳转，保证统计事件发送完成
       setTimeout(function(){
         countEvent('jump_success');
         window.location.href = targetUrl;
-      }, 100);
+      },1200);
     }
-  };
-  document.head.appendChild(script);
+  });
 })();
 </script>
 
