@@ -4,106 +4,309 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>请用外部浏览器打开</title>
-
-<!-- GoatCounter（官方稳定版） -->
-<script data-goatcounter="https://story.goatcounter.com/count"
-async src="//gc.zgo.at/count.js"></script>
-
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;background:#f0f2f5;font-family:"Microsoft YaHei",sans-serif;overflow:hidden;}
-.loading-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#6b7280;font-size:15px;background:#f9fafc;}
-.spinner{width:36px;height:36px;margin-bottom:12px;border:3px solid rgba(0,0,0,0.05);border-top-color:#07c160;border-radius:50%;animation:spin 0.9s infinite linear;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-#weixin-mask{
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-z-index:10000;
-background:rgba(0,0,0,0.5);
-backdrop-filter:blur(10px);
-pointer-events:none;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #f0f2f5;
+  font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
 }
 
-.guide-container{
-position:absolute;
-top:12px;
-right:12px;
-display:flex;
-flex-direction:column;
-align-items:flex-end;
-gap:8px;
-max-width:240px;
+/* 极简加载占位（背景干净） */
+.loading-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: #6b7280;
+  font-size: 15px;
+  background: #f9fafc;
+}
+.spinner {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 12px;
+  border: 3px solid rgba(0,0,0,0.05);
+  border-top-color: #07c160;
+  border-radius: 50%;
+  animation: spin 0.9s infinite linear;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- 微信遮罩 - 通透柔和版 ---------- */
+#weixin-mask {
+  display: none;  /* 仅微信内显示 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+
+  /* 更通透的毛玻璃：降低暗度，保留质感 */
+  background: rgba(0, 0, 0, 0.5);        /* 半透明降低 */
+  backdrop-filter: blur(10px) brightness(0.9);
+  -webkit-backdrop-filter: blur(10px) brightness(0.9);
+
+  pointer-events: none;  /* 关键：让点击穿透 */
+
+  animation: maskGentle 0.4s ease-out forwards;
 }
 
-.tip-card{
-background:rgba(30,30,35,0.75);
-border-radius:24px;
-padding:10px 16px;
-color:#fff;
-font-size:16px;
-line-height:1.3;
+@keyframes maskGentle {
+  0% { opacity: 0; backdrop-filter: blur(0px) brightness(1); }
+  100% { opacity: 1; backdrop-filter: blur(10px) brightness(0.9); }
+}
+
+#weixin-mask * {
+  pointer-events: none;
+}
+
+/* 引导容器 - 位置调整：更高、更小巧 */
+.guide-container {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));    /* 上移 */
+  right: max(12px, env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;               /* 手指与卡片的间距减小 */
+  max-width: 240px;        /* 整体收窄 */
+  transform: translateZ(0);
+}
+
+/* 手指区域 - 彩色设计，更形象 */
+.finger-wrapper {
+  position: relative;
+  width: 60px;             /* 稍微缩小 */
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(5deg) translateX(5px);
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.2));
+}
+
+/* 新手指图标：采用橙黄渐变色，轮廓更清晰 */
+.finger-svg {
+  width: 60px;
+  height: 60px;
+  fill: url(#fingerGradient);  /* 引用渐变色 */
+  opacity: 1;
+  transform-origin: 70% 30%;
+  animation: fingerSoftTap 2s infinite ease-in-out;
+  filter: drop-shadow(0 2px 4px rgba(255,160,0,0.3));
+}
+
+/* 定义渐变色，使手指更立体 */
+.finger-gradient defs {
+  display: block;
+}
+
+@keyframes fingerSoftTap {
+  0%, 100% { transform: scale(1) translateY(0) rotate(0deg); }
+  30% { transform: scale(1.05) translateY(-3px) rotate(-2deg); }
+  70% { transform: scale(0.98) translateY(1px) rotate(1deg); }
+}
+
+/* 波纹颜色调浅，更柔和 */
+.ripple {
+  position: absolute;
+  top: 6px;
+  right: 2px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(255, 215, 100, 0.15);
+  box-shadow: 0 0 0 0 rgba(255, 200, 100, 0.3);
+  z-index: -1;
+  animation: rippleWave 2.4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ripple::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255, 180, 70, 0.1);
+  animation: rippleWave2 2.4s infinite 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes rippleWave {
+  0% { transform: scale(0.7); opacity: 0.6; }
+  50% { transform: scale(1.5); opacity: 0.2; }
+  100% { transform: scale(2.0); opacity: 0; }
+}
+
+@keyframes rippleWave2 {
+  0% { transform: scale(0.6); opacity: 0.5; }
+  50% { transform: scale(1.3); opacity: 0.15; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* 引导卡片 - 更小、更紧凑 */
+.tip-card {
+  background: rgba(30, 30, 35, 0.75);   /* 深色但半透明，与浅背景搭配 */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 24px;
+  padding: 10px 16px;                    /* 缩小内边距 */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.2);
+  text-align: right;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 16px;                        /* 稍小 */
+  font-weight: 500;
+  line-height: 1.3;                        /* 紧凑行高 */
+  letter-spacing: 0.2px;
+  transform-origin: right center;
+  animation: cardGlide 2.4s infinite alternate ease-in-out;
+}
+
+@keyframes cardGlide {
+  0% { transform: translateX(0) translateY(0); }
+  100% { transform: translateX(-4px) translateY(-4px); }
+}
+
+/* 三个点间距缩小，更紧凑 */
+.dots-icon {
+  display: inline-block;
+  font-size: 22px;                        /* 略微调小 */
+  letter-spacing: 1px;                     /* 缩小间距，原先是2px */
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  background: rgba(255,255,255,0.1);
+  border-radius: 24px;
+  padding: 0 3px;
+  margin: 0 1px;
+}
+
+.highlight-text {
+  color: #b7ff8c;                          /* 更柔和的亮绿 */
+  font-weight: 600;
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.highlight-text::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #b7ff8c, #d9ffb8);
+  border-radius: 2px;
+  opacity: 0.8;
+  animation: lineWidth 1.6s infinite alternate;
+}
+
+@keyframes lineWidth {
+  0% { width: 50%; left: 25%; }
+  100% { width: 100%; left: 0; }
+}
+
+/* 箭头稍微缩小 */
+.mini-arrow {
+  margin-left: 4px;
+  font-size: 20px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+  animation: arrowSlide 1.2s infinite alternate;
+}
+
+@keyframes arrowSlide {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(4px); }
+}
+
+/* 针对小屏微调 */
+@media (max-width: 360px) {
+  .tip-card { font-size: 15px; padding: 8px 14px; }
+  .finger-wrapper { width: 52px; height: 52px; }
+  .finger-svg { width: 52px; height: 52px; }
 }
 </style>
 </head>
-
 <body>
 
+<!-- 渐变定义（用于手指彩色） -->
+<svg width="0" height="0" style="position:absolute;">
+  <defs>
+    <linearGradient id="fingerGradient" x1="20%" y1="10%" x2="80%" y2="90%">
+      <stop offset="0%" stop-color="#FFB347" />   <!-- 橙黄 -->
+      <stop offset="70%" stop-color="#FF8C42" />  <!-- 暖橙 -->
+      <stop offset="100%" stop-color="#FF6F3C" /> <!-- 偏红橙 -->
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- 微信遮罩（优化版） -->
 <div id="weixin-mask">
-<div class="guide-container">
-<div class="tip-card">
-点击右上角 ••• <br>
-选择 在浏览器打开 ↗
-</div>
-</div>
+  <div class="guide-container">
+    <!-- 彩色手指 + 柔和波纹 -->
+    <div class="finger-wrapper">
+      <svg class="finger-svg" viewBox="0 0 64 64" width="60" height="60">
+        <!-- 使用渐变填充，让手指更立体真实 -->
+        <path d="M30 6c-4.4 0-8 3.6-8 8v20l-5-5c-3-3-7.8-3-10.8 0s-3 7.8 0 10.8l14 14c2 2 4.8 3.2 7.8 3.2h12c6 0 10.8-4.8 10.8-10.8V26c0-4.4-3.6-8-8-8s-8 3.6-8 8v6h-2V14c0-4.4-3.6-8-8-8z" fill="url(#fingerGradient)"/>
+      </svg>
+      <div class="ripple"></div>
+    </div>
+
+    <!-- 紧凑文字卡片 -->
+    <div class="tip-card">
+      <span>点击右上角</span>
+      <span class="dots-icon">•••</span><br>
+      <span>选择</span>
+      <span class="highlight-text">在浏览器打开</span>
+      <span class="mini-arrow">↗</span>
+    </div>
+  </div>
 </div>
 
+<!-- 占位（非微信可见，很淡） -->
 <div class="loading-placeholder" id="loading-placeholder">
-<div class="spinner"></div>
-<div>正在准备跳转…</div>
+  <div class="spinner"></div>
+  <div>正在准备跳转…</div>
 </div>
 
 <script>
-(function(){
+(function() {
+  var targetUrl = "https://csdw-lg.github.io/from2/";
+  
+  function isWechat() {
+    return navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1;
+  }
 
-var targetUrl="https://csdw-lg.github.io/from2/";
-var mask=document.getElementById('weixin-mask');
-var placeholder=document.getElementById('loading-placeholder');
+  var mask = document.getElementById('weixin-mask');
+  var placeholder = document.getElementById('loading-placeholder');
 
-function isWechat(){
-return navigator.userAgent.toLowerCase().indexOf('micromessenger')!==-1;
-}
-
-function countEvent(name){
-if(window.goatcounter && window.goatcounter.count){
-window.goatcounter.count({path:name});
-}
-}
-
-// 页面访问
-setTimeout(function(){
-countEvent('page_enter');
-},80);
-
-if(isWechat()){
-mask.style.display='block';
-placeholder.style.display='none';
-countEvent('wechat_open');
-}else{
-countEvent('browser_open');
-
-setTimeout(function(){
-countEvent('jump_success');
-window.location.href=targetUrl;
-},120);
-}
-
+  if (isWechat()) {
+    if (mask) mask.style.display = 'block';
+    if (placeholder) placeholder.style.opacity = '0.4'; // 低调显示（其实被遮罩覆盖）
+  } else {
+    window.location.href = targetUrl;
+  }
 })();
 </script>
 
+<!-- 更新说明：
+     1. 遮罩背景变浅 (0.5黑 + 亮度0.9)，不压抑。
+     2. 提示卡片缩小(padding减少，字体16px)，位置上移(top:12px)。
+     3. 三个点间距缩小(letter-spacing:1px)。
+     4. 整体行高1.3，文字紧凑。
+     5. 手指图标使用橙黄渐变，更形象醒目，保留波纹。
+-->
 </body>
 </html>
