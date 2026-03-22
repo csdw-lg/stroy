@@ -5,10 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>请用外部浏览器打开</title>
 
-<!-- GoatCounter 统计 -->
-<script data-goatcounter="https://story.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
-
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html,body{width:100%;height:100%;background:#f0f2f5;font-family:"Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;overflow:hidden;}
@@ -50,7 +46,7 @@ html,body{width:100%;height:100%;background:#f0f2f5;font-family:"Microsoft YaHei
       </svg>
       <div class="ripple"></div>
     </div>
-    <div class="tip-card">
+    <div class="tip-card" id="wechat-open-card">
       点击右上角 <span class="dots-icon">•••</span><br>
       选择 <span class="highlight-text">在浏览器打开</span> <span class="mini-arrow">↗</span>
     </div>
@@ -65,12 +61,12 @@ html,body{width:100%;height:100%;background:#f0f2f5;font-family:"Microsoft YaHei
 <script>
 (function(){
   var targetUrl = "https://csdw-lg.github.io/from2/";
-  var mask=document.getElementById('weixin-mask');
-  var placeholder=document.getElementById('loading-placeholder');
+  var mask = document.getElementById('weixin-mask');
+  var placeholder = document.getElementById('loading-placeholder');
+  var wechatCard = document.getElementById('wechat-open-card');
 
   function isWechat(){ return navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1; }
 
-  // 封装统计事件
   function countEvent(name){
     if(window.goatcounter && window.goatcounter.count){
       window.goatcounter.count({path:name});
@@ -79,25 +75,36 @@ html,body{width:100%;height:100%;background:#f0f2f5;font-family:"Microsoft YaHei
         if(window.goatcounter && window.goatcounter.count){
           window.goatcounter.count({path:name});
         }
-      },300);
+      },50);
     }
   }
 
-  // 页面进入统计
-  countEvent('page_enter');
+  // 异步加载 GoatCounter
+  var script = document.createElement('script');
+  script.src = "//gc.zgo.at/count.js";
+  script.async = true;
+  script.onload = function(){
+    countEvent('page_enter');
 
-  // 微信/浏览器访问统计
-  if(isWechat()){
-    if(mask) mask.style.display='block';
-    if(placeholder) placeholder.style.opacity='0.4';
-    countEvent('wechat_open');
-  } else {
-    countEvent('browser_open');
-    setTimeout(function(){
-      countEvent('jump_success');
-      window.location.href = targetUrl;
-    },900);
-  }
+    if(isWechat()){
+      if(mask) mask.style.display='block';
+      if(placeholder) placeholder.style.opacity='0.4';
+      countEvent('wechat_open');
+
+      // 微信内点击“在浏览器打开”统计
+      wechatCard.addEventListener('click', function(){
+        countEvent('wechat_jump'); // 微信跳转统计
+      });
+
+    } else {
+      countEvent('browser_open');
+      setTimeout(function(){
+        countEvent('jump_success');
+        window.location.href = targetUrl;
+      }, 100);
+    }
+  };
+  document.head.appendChild(script);
 })();
 </script>
 
